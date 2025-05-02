@@ -1,0 +1,11 @@
+chromadb
+langchain
+langchain-chroma
+langchain-ollama
+pypdf
+flask
+flask-login
+bcrypt
+python-dotenv
+psycopg2-binary
+langchain_community

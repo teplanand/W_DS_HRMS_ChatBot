@@ -1,0 +1,22 @@
+**Set Up User and Database:
+
+- Log in as postgres user:
+
+sudo -u postgres psql  # Linux
+psql -U postgres      # Windows/macOS
+
+- Create database and user:
+
+CREATE DATABASE hr_chatbot;
+CREATE USER hr_user WITH PASSWORD 'securepassword123';
+ALTER ROLE hr_user SET client_encoding TO 'utf8';
+ALTER ROLE hr_user SET default_transaction_isolation TO 'read committed';
+ALTER ROLE hr_user SET timezone TO 'UTC';
+GRANT ALL PRIVILEGES ON DATABASE hr_chatbot TO hr_user;
+
+Note: Replace securepassword123 with a strong password.
+      make hr_user a super user from pgadmin if needed.
+
+- Exit psql:
+\q
+

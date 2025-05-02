@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GBS HR Assistant - Authentication</title>
+    <link rel="icon" type="image/x-icon" href="/frontend/images/favicon.ico">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/frontend/css/auth.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <h1 class="auth-title">GBS HR Assistant</h1>
+            <div class="auth-tabs">
+                <button id="loginTab" class="tab active" onclick="toggleForm('login')">Login</button>
+                <button id="registerTab" class="tab" onclick="toggleForm('register')">Sign Up</button>
+            </div>
+            <form id="loginForm" class="auth-form" action="/login" method="POST">
+                <div class="form-group">
+                    <i class="fas fa-envelope icon"></i>
+                    <input type="email" id="loginEmail" name="email" placeholder="Email" required>
+                </div>
+                <div class="form-group">
+                    <i class="fas fa-lock icon"></i>
+                    <input type="password" id="loginPassword" name="password" placeholder="Password" required>
+                </div>
+                <div class="forgot-link-wrapper">
+                    <a href="/reset_password" class="forgot-link">Forgot Password?</a>
+                </div>
+                <button type="submit" class="auth-button">Login</button>
+            </form>
+            <form id="registerForm" class="auth-form" action="/register" method="POST" style="display: none;">
+                <div class="form-group">
+                    <i class="fas fa-user icon"></i>
+                    <input type="text" id="registerName" name="name" placeholder="Full Name" required>
+                </div>
+                <div class="form-group">
+                    <i class="fas fa-envelope icon"></i>
+                    <input type="email" id="registerEmail" name="email" placeholder="Email" required>
+                </div>
+                <div class="form-group">
+                    <i class="fas fa-id-badge icon"></i>
+                    <input type="text" id="employeeId" name="employee_id" placeholder="Employee ID" required>
+                </div>
+                <div class="form-group">
+                    <i class="fas fa-building icon"></i>
+                    <input type="text" id="department" name="department" placeholder="Department" required>
+                </div>
+                <div class="form-group">
+                    <i class="fas fa-briefcase icon"></i>
+                    <input type="text" id="jobTitle" name="job_title" placeholder="Job Title" required>
+                </div>
+                <div class="form-group">
+                    <i class="fas fa-lock icon"></i>
+                    <input type="password" id="registerPassword" name="password" placeholder="Password" required>
+                </div>
+                <button type="submit" class="auth-button">Sign Up</button>
+            </form>
+            <div id="verifyEmailPrompt" class="auth-form" style="display: none;">
+                <p>Please verify your email to access the chatbot. Check your inbox for a verification link.</p>
+                <form id="resendForm" action="/resend_verification" method="POST">
+                    <div class="form-group">
+                        <i class="fas fa-envelope icon"></i>
+                        <input type="email" id="verifyEmail" name="email" placeholder="Enter your email" required>
+                    </div>
+                    <button type="submit" class="auth-button">Resend Verification Email</button>
+                </form>
+                <a href="/logout" class="forgot-link">Sign Out</a>
+            </div>
+        </div>
+    </div>
+    <div id="loadingSpinner" class="spinner-overlay">
+        <div class="spinner"></div>
+    </div>
+
+    <script>
+        // Handle flash messages
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    setTimeout(() => alert('{{ message }}'), 100);
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    
+        // Handle form redirect with transition
+        const loginForm = document.getElementById('loginForm');
+        if (loginForm) {
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const spinner = document.getElementById('loadingSpinner');
+                spinner.style.display = 'flex';
+                document.body.style.transition = 'opacity 0.5s ease';
+                document.body.style.opacity = '0';
+                
+                // Submit form normally to allow browser redirect
+                loginForm.submit();
+            });
+        }
+    
+        function triggerTransition(url) {
+            console.log("Triggering transition to:", url);
+            const spinner = document.getElementById('loadingSpinner');
+            document.body.style.transition = 'opacity 0.5s ease';
+            document.body.style.opacity = '0';
+            spinner.style.display = 'flex';
+            setTimeout(() => {
+                window.location.href = url;
+            }, 500);
+        }
+    
+        function toggleForm(formType) {
+            console.log("Toggling to:", formType);
+            const loginTab = document.getElementById('loginTab');
+            const registerTab = document.getElementById('registerTab');
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const verifyEmailPrompt = document.getElementById('verifyEmailPrompt');
+    
+            loginTab.classList.remove('active');
+            registerTab.classList.remove('active');
+            loginForm.style.display = 'none';
+            registerForm.style.display = 'none';
+            verifyEmailPrompt.style.display = 'none';
+    
+            if (formType === 'login') {
+                loginTab.classList.add('active');
+                loginForm.style.display = 'flex';
+                loginForm.style.opacity = '0';
+                loginForm.style.transition = 'opacity 0.3s ease';
+                setTimeout(() => { loginForm.style.opacity = '1'; }, 10);
+            } else if (formType === 'register') {
+                registerTab.classList.add('active');
+                registerForm.style.display = 'flex';
+                registerForm.style.opacity = '0';
+                registerForm.style.transition = 'opacity 0.3s ease';
+                setTimeout(() => { registerForm.style.opacity = '1'; }, 10);
+            } else if (formType === 'verify') {
+                verifyEmailPrompt.style.display = 'block';
+                verifyEmailPrompt.style.opacity = '0';
+                verifyEmailPrompt.style.transition = 'opacity 0.3s ease';
+                setTimeout(() => { verifyEmailPrompt.style.opacity = '1'; }, 10);
+            }
+    
+            // Update URL hash
+            window.location.hash = formType;
+        }
+    
+        // Check URL hash on load
+        window.addEventListener('load', () => {
+            const hash = window.location.hash.replace('#', '');
+            if (hash === 'register') {
+                toggleForm('register');
+            } else if (hash === 'verify') {
+                toggleForm('verify');
+            } else {
+                toggleForm('login');
+            }
+        });
+    </script>
+</body>
+</html>
